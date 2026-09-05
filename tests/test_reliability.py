@@ -49,16 +49,22 @@ def test_rotating_log_is_configured_once():
         path = Path(temporary) / "fsc.log"
         root = logging.getLogger("faceset_curator")
         existing_handlers = set(root.handlers)
-        configure_logging(path)
-        configure_logging(path)
-        logger = logging.getLogger("faceset_curator.test")
-        logger.warning("reliability test")
-        matching = [handler for handler in root.handlers if handler not in existing_handlers]
-        assert len(matching) == 1
-        for handler in matching:
-            handler.flush()
-        assert path.is_file()
-        assert "reliability test" in path.read_text(encoding="utf-8")
-        for handler in matching:
-            root.removeHandler(handler)
-            handler.close()
+        matching = []
+        try:
+            configure_logging(path)
+            configure_logging(path)
+            logger = logging.getLogger("faceset_curator.test")
+            logger.warning("reliability test")
+            matching = [
+                handler for handler in root.handlers
+                if handler not in existing_handlers
+            ]
+            assert len(matching) == 1
+            for handler in matching:
+                handler.flush()
+            assert path.is_file()
+            assert "reliability test" in path.read_text(encoding="utf-8")
+        finally:
+            for handler in matching:
+                root.removeHandler(handler)
+                handler.close()

@@ -14,6 +14,20 @@ def default_log_path() -> Path:
     return base / "FaceSetCurator" / "logs" / "fsc.log"
 
 
+def _same_log_file(handler: logging.Handler, log_path: Path) -> bool:
+    if not isinstance(handler, RotatingFileHandler):
+        return False
+    base_filename = getattr(handler, "baseFilename", "")
+    if not base_filename:
+        return False
+    try:
+        return os.path.samefile(base_filename, log_path)
+    except OSError:
+        left = os.path.normcase(os.path.abspath(base_filename))
+        right = os.path.normcase(os.path.abspath(log_path))
+        return left == right
+
+
 def configure_logging(path: Path | None = None) -> Path:
     log_path = path or default_log_path()
     try:
@@ -27,10 +41,7 @@ def configure_logging(path: Path | None = None) -> Path:
         log_path.parent.mkdir(parents=True, exist_ok=True)
     root = logging.getLogger("faceset_curator")
     root.setLevel(logging.INFO)
-    resolved = os.path.normcase(str(log_path.resolve()))
-    if not any(isinstance(handler, RotatingFileHandler)
-               and os.path.normcase(getattr(handler, "baseFilename", "")) == resolved
-               for handler in root.handlers):
+    if not any(_same_log_file(handler, log_path) for handler in root.handlers):
         handler = RotatingFileHandler(log_path, maxBytes=5 * 1024 * 1024,
                                       backupCount=3, encoding="utf-8")
         handler.setFormatter(logging.Formatter(
