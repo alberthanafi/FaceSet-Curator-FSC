@@ -1,0 +1,29 @@
+# Copyright © 2026 Hanafi Mohd Radi. All rights reserved.
+
+name: Windows tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Install test dependencies
+        run: python -m pip install -e ".[test]"
+      - name: Compile source
+        run: python -m compileall -q src tests packaging
+      - name: Run release tests
+        run: python packaging/run_tests.py

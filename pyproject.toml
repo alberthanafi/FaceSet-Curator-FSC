@@ -1,0 +1,36 @@
+# Copyright © 2026 Hanafi Mohd Radi. All rights reserved.
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "faceset-curator"
+version = "0.1.0"
+description = "Local, auditable, diversity-aware face dataset curator"
+authors = [{ name = "Hanafi Mohd Radi" }]
+license = { text = "Copyright © 2026 Hanafi Mohd Radi. All rights reserved." }
+classifiers = ["Private :: Do Not Upload"]
+requires-python = ">=3.11"
+dependencies = ["Pillow>=10.0", "psutil>=6.0"]
+
+[project.optional-dependencies]
+gpu = [
+  "numpy>=2.0",
+  "opencv-python-headless>=4.10",
+  "onnx>=1.16",
+  "onnxruntime-gpu[cuda,cudnn]>=1.21,<1.27",
+  "insightface>=0.7.3",
+]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+fsc = "faceset_curator.cli:main"
+fsc-gui = "faceset_curator.gui:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

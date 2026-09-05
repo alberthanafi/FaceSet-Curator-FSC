@@ -1,0 +1,10 @@
+# Copyright © 2026 Hanafi Mohd Radi. All rights reserved.
+
+* text=auto
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+*.iss text eol=crlf
+*.py text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+*.csv text eol=lf
