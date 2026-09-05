@@ -47,13 +47,14 @@ def test_materialize_reuses_verified_manifest_copy():
 def test_rotating_log_is_configured_once():
     with tempfile.TemporaryDirectory(prefix="fsc-log-test-") as temporary:
         path = Path(temporary) / "fsc.log"
+        root = logging.getLogger("faceset_curator")
+        existing_handlers = set(root.handlers)
         configure_logging(path)
         configure_logging(path)
         logger = logging.getLogger("faceset_curator.test")
         logger.warning("reliability test")
-        root = logging.getLogger("faceset_curator")
-        matching = [handler for handler in root.handlers
-                    if getattr(handler, "baseFilename", None) == str(path.resolve())]
+        matching = [handler for handler in root.handlers if handler not in existing_handlers]
+        assert len(matching) == 1
         for handler in matching:
             handler.flush()
         assert path.is_file()
