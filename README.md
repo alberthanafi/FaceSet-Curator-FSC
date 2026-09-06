@@ -62,6 +62,8 @@ The setup screen continuously displays total CPU load, system RAM use, NVIDIA GP
 
 The desktop controls and dropdown lists use a high-contrast dark theme, including read-only selection fields.
 
+The Help tab provides searchable offline documentation for setup, references, selection profiles, identity verification, duplicate filtering, large-library performance, results, reports, troubleshooting, privacy, and source safety. Its About FSC page shows the installed version, copyright notice, technology summary, and project website.
+
 The Results tab can filter selected images and every rejection category, including identity, quality, duplicates, redundancy, multiple faces, invalid images, and manual exclusions. Minimum identity and quality filters narrow large result sets. Selecting a duplicate automatically shows its group representative for side-by-side comparison, and every row displays its recorded “why rejected” reason. Eligible redundant images can be manually included and selected images can be excluded; safety rejections such as wrong identity, multiple faces, invalid files, low quality, and duplicates remain locked. Each controlled edit keeps the target size when alternatives exist, recalculates collective dataset values, updates categorized copies and all reports, and preserves the previous report revision under `.fsc-review-history`.
 
 Large-library processing uses indexed perceptual-hash duplicate lookup, incremental diversity scoring, and batched SQLite cache commits. These keep sorting and collective selection responsive without changing the Balanced, Strong, or High defaults.

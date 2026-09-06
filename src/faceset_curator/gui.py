@@ -10,16 +10,18 @@ import threading
 import time
 import tkinter as tk
 import traceback
+import webbrowser
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
 from PIL import Image, ImageOps, ImageTk
 
-from . import __copyright__
+from . import __copyright__, __version__
 from .analyzer import BaselineAnalyzer
 from .app_logging import configure_logging
 from .cuda_analyzer import InsightFaceAnalyzer
 from .identity import identity_statistics
+from .help_content import DOCUMENTATION_TOPICS, HELP_TOPICS, matching_help_topics
 from .models import CuratorConfig, ImageAnalysis
 from .pipeline import CurationCancelled, curate
 from .preflight import InsufficientDiskSpace, check_disk_space
@@ -85,6 +87,8 @@ class FaceSetCuratorApp(tk.Tk):
         self.result_count_var = tk.StringVar(value="0 images")
         self.review_primary_var = tk.StringVar(value="Select an image to review.")
         self.review_compare_var = tk.StringVar(value="Choose a comparison image.")
+        self.help_search_var = tk.StringVar()
+        self.help_topic_ids: dict[str, str] = {}
         self.run_started_at: float | None = None
         self.smoothed_analysis_rate: float | None = None
         self.references: list[Path] = []
@@ -143,10 +147,13 @@ class FaceSetCuratorApp(tk.Tk):
         self.notebook.pack(fill="both", expand=True)
         setup = ttk.Frame(self.notebook, padding=22, style="Card.TFrame")
         self.results = ttk.Frame(self.notebook, padding=18, style="Card.TFrame")
+        self.help = ttk.Frame(self.notebook, padding=18, style="Card.TFrame")
         self.notebook.add(setup, text="  Setup & Run  ")
         self.notebook.add(self.results, text="  Results  ")
+        self.notebook.add(self.help, text="  Help  ")
         self._build_setup(setup)
         self._build_results(self.results)
+        self._build_help(self.help)
 
     def _row(self, parent, row: int, label: str, variable: tk.Variable, command, button: str) -> None:
         ttk.Label(parent, text=label, style="Card.TLabel").grid(row=row, column=0, sticky="w", pady=8)
@@ -305,6 +312,123 @@ class FaceSetCuratorApp(tk.Tk):
         self.exclude_button = ttk.Button(review_actions, text="Exclude / replace",
                                          command=self._manual_exclude, state="disabled")
         self.exclude_button.pack(side="left", padx=5)
+
+    def _build_help(self, parent) -> None:
+        toolbar = ttk.Frame(parent, style="Card.TFrame")
+        toolbar.pack(fill="x", pady=(0, 12))
+        ttk.Button(toolbar, text="Home", command=lambda: self._select_help_topic("overview")).pack(side="left")
+        ttk.Button(toolbar, text="About FSC", command=lambda: self._select_help_topic("about")).pack(side="left", padx=6)
+        ttk.Label(toolbar, text="Search documentation", style="Card.TLabel").pack(side="left", padx=(18, 6))
+        search = ttk.Entry(toolbar, textvariable=self.help_search_var, width=32)
+        search.pack(side="left", fill="x", expand=True)
+        search.bind("<Return>", lambda _event: self._populate_help_tree())
+        ttk.Button(toolbar, text="Search", command=self._populate_help_tree).pack(side="left", padx=(6, 0))
+        ttk.Button(toolbar, text="Clear", command=self._clear_help_search).pack(side="left", padx=6)
+        ttk.Button(toolbar, text="Project website", command=self._open_project_website).pack(side="right")
+
+        split = ttk.Panedwindow(parent, orient="horizontal")
+        split.pack(fill="both", expand=True)
+        navigation = ttk.Frame(split, style="Card.TFrame")
+        article = ttk.Frame(split, padding=(16, 0, 0, 0), style="Card.TFrame")
+        split.add(navigation, weight=1)
+        split.add(article, weight=3)
+
+        self.help_tree = ttk.Treeview(navigation, show="tree", selectmode="browse")
+        help_scroll = ttk.Scrollbar(navigation, orient="vertical", command=self.help_tree.yview)
+        self.help_tree.configure(yscrollcommand=help_scroll.set)
+        self.help_tree.pack(side="left", fill="both", expand=True)
+        help_scroll.pack(side="right", fill="y")
+        self.help_tree.bind("<<TreeviewSelect>>", self._help_selection_changed)
+
+        self.help_text = tk.Text(
+            article, wrap="word", bg="#0d141c", fg="#d8e4ed", insertbackground="#ffffff",
+            relief="flat", padx=18, pady=16, state="disabled", spacing1=2, spacing3=5,
+        )
+        article_scroll = ttk.Scrollbar(article, orient="vertical", command=self.help_text.yview)
+        self.help_text.configure(yscrollcommand=article_scroll.set)
+        self.help_text.tag_configure("title", foreground="#ffffff", font=("Segoe UI Semibold", 19), spacing3=14)
+        self.help_text.tag_configure("meta", foreground="#32d3a2", font=("Segoe UI Semibold", 10), spacing3=12)
+        self.help_text.tag_configure("heading", foreground="#ffffff", font=("Segoe UI Semibold", 12), spacing1=12, spacing3=4)
+        self.help_text.tag_configure("body", foreground="#d8e4ed", font=("Segoe UI", 10), lmargin1=2, lmargin2=2, spacing3=7)
+        self.help_text.pack(side="left", fill="both", expand=True)
+        article_scroll.pack(side="right", fill="y")
+        self._populate_help_tree()
+        self._select_help_topic("overview")
+
+    def _populate_help_tree(self) -> None:
+        selected_key = self._current_help_topic()
+        self.help_tree.delete(*self.help_tree.get_children())
+        self.help_topic_ids.clear()
+        query = self.help_search_var.get().strip()
+        matches = matching_help_topics(query)
+        if query:
+            for key in matches:
+                item_id = f"help_{key}"
+                self.help_tree.insert("", "end", iid=item_id, text=HELP_TOPICS[key][0])
+                self.help_topic_ids[item_id] = key
+        else:
+            docs = self.help_tree.insert("", "end", iid="help_docs", text="Documentation", open=True)
+            self.help_topic_ids[docs] = "overview"
+            for key in DOCUMENTATION_TOPICS:
+                item_id = f"help_{key}"
+                self.help_tree.insert(docs, "end", iid=item_id, text=HELP_TOPICS[key][0])
+                self.help_topic_ids[item_id] = key
+            about = self.help_tree.insert("", "end", iid="help_about", text="About FSC")
+            self.help_topic_ids[about] = "about"
+        if not matches:
+            self._render_help_message("No documentation topics match that search.")
+            return
+        self._select_help_topic(selected_key if selected_key in matches else matches[0])
+
+    def _clear_help_search(self) -> None:
+        self.help_search_var.set("")
+        self._populate_help_tree()
+        self._select_help_topic("overview")
+
+    def _current_help_topic(self) -> str:
+        selected = self.help_tree.selection() if hasattr(self, "help_tree") else ()
+        return self.help_topic_ids.get(selected[0], "overview") if selected else "overview"
+
+    def _select_help_topic(self, key: str) -> None:
+        if key not in self.help_topic_ids.values() and self.help_search_var.get():
+            self.help_search_var.set("")
+            self._populate_help_tree()
+        for item_id, topic_key in self.help_topic_ids.items():
+            if topic_key == key:
+                self.help_tree.selection_set(item_id)
+                self.help_tree.focus(item_id)
+                self.help_tree.see(item_id)
+                self._render_help_topic(key)
+                return
+
+    def _help_selection_changed(self, _event=None) -> None:
+        selected = self.help_tree.selection()
+        if selected and (key := self.help_topic_ids.get(selected[0])):
+            self._render_help_topic(key)
+
+    def _render_help_message(self, message: str) -> None:
+        self.help_text.configure(state="normal")
+        self.help_text.delete("1.0", "end")
+        self.help_text.insert("end", message, "body")
+        self.help_text.configure(state="disabled")
+
+    def _render_help_topic(self, key: str) -> None:
+        title, summary, sections = HELP_TOPICS[key]
+        self.help_text.configure(state="normal")
+        self.help_text.delete("1.0", "end")
+        self.help_text.insert("end", title + "\n", "title")
+        if key == "about":
+            self.help_text.insert("end", f"FaceSet Curator {__version__}\n{__copyright__}\n", "meta")
+        self.help_text.insert("end", summary + "\n", "body")
+        for heading, body in sections:
+            self.help_text.insert("end", heading + "\n", "heading")
+            self.help_text.insert("end", body + "\n", "body")
+        self.help_text.configure(state="disabled")
+        self.help_text.yview_moveto(0)
+
+    @staticmethod
+    def _open_project_website() -> None:
+        webbrowser.open("https://github.com/alberthanafi/FaceSet-Curator-FSC")
 
     def _choose_source(self) -> None:
         if value := filedialog.askdirectory(title="Choose source image folder"):
