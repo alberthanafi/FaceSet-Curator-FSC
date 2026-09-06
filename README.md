@@ -101,7 +101,7 @@ The PyInstaller definition is in `packaging/`. To produce `dist/FaceSetCurator.e
 powershell -ExecutionPolicy Bypass -File packaging\build.ps1
 ```
 
-The release script compiles the project, runs the dependency-free test suite, verifies real CUDA inference, builds the standalone executable, and runs the executable's own `--doctor` and self-closing `--gui-smoke` checks. If Inno Setup 7 (preferred) or 6 is installed, it also creates `dist\FaceSetCurator-Setup.exe`; the installer repeats CUDA verification after installation and displays a repair warning if it fails.
+The release script compiles the project, runs the dependency-free test suite, verifies real CUDA inference, builds the standalone executable, and runs the executable's own `--doctor` and self-closing `--gui-smoke` checks. It removes InsightFace's overlapping CPU-only ONNX Runtime distribution and reinstalls the GPU distribution last, preventing an apparently successful CPU-only package. If Inno Setup 7 (preferred) or 6 is installed, the script also creates `dist\FaceSetCurator-Setup.exe`; the installer repeats CUDA verification after installation and displays a repair warning if it fails.
 
 ## Output
 

@@ -2,6 +2,7 @@
 
 #define AppName "FaceSet Curator"
 #define AppVersion "0.1.0"
+#define AppFileVersion "0.1.0.0"
 #define AppExeName "FaceSetCurator.exe"
 
 [Setup]
@@ -9,6 +10,7 @@ AppId={{1B00AF6C-745B-45A6-A8E6-35E61B73B7B8}
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppPublisher=Hanafi Mohd Radi
+AppPublisherURL=https://github.com/alberthanafi/FaceSet-Curator-FSC
 DefaultDirName={autopf}\FaceSet Curator
 DefaultGroupName={#AppName}
 OutputDir=..\dist
@@ -19,6 +21,8 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 WizardStyle=modern
 VersionInfoCopyright=Copyright © 2026 Hanafi Mohd Radi. All rights reserved.
+VersionInfoVersion={#AppFileVersion}
+UninstallDisplayIcon={app}\{#AppExeName}
 
 [Files]
 Source: "..\dist\{#AppExeName}"; DestDir: "{app}"; Flags: ignoreversion
