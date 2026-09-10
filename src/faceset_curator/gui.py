@@ -32,6 +32,15 @@ from .telemetry import SystemMonitor
 LOGGER = logging.getLogger(__name__)
 
 
+def analysis_columns_for_width(width: int) -> int:
+    """Return an analysis-control layout that remains readable when narrowed."""
+    if width >= 980:
+        return 8
+    if width >= 680:
+        return 4
+    return 2
+
+
 def friendly_failure(message: str) -> str:
     lowered = message.lower()
     if "download" in lowered or "connectionreset" in lowered or "connection reset" in lowered:
@@ -51,8 +60,8 @@ class FaceSetCuratorApp(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.title("FaceSet Curator")
-        self.geometry("1120x760")
-        self.minsize(900, 640)
+        self.geometry("1120x780")
+        self.minsize(900, 620)
         self.configure(bg="#101720")
         self.log_path = configure_logging()
         LOGGER.info("Desktop application started")
@@ -135,10 +144,10 @@ class FaceSetCuratorApp(tk.Tk):
                   foreground=[("selected", "#07120f")])
 
     def _build(self) -> None:
-        shell = ttk.Frame(self, padding=24)
+        shell = ttk.Frame(self, padding=20)
         shell.pack(fill="both", expand=True)
         header = ttk.Frame(shell)
-        header.pack(fill="x", pady=(0, 18))
+        header.pack(fill="x", pady=(0, 12))
         ttk.Label(header, text="FaceSet Curator", style="Title.TLabel").pack(anchor="w")
         ttk.Label(header, text="Build the best collective face dataset—not merely the highest individual scores.", style="Muted.TLabel").pack(anchor="w", pady=(3, 0))
         ttk.Label(header, text=__copyright__, style="Muted.TLabel").pack(anchor="w", pady=(3, 0))
@@ -161,6 +170,32 @@ class FaceSetCuratorApp(tk.Tk):
         ttk.Button(parent, text=button, command=command).grid(row=row, column=2, pady=8)
 
     def _build_setup(self, parent) -> None:
+        parent.columnconfigure(0, weight=1)
+        parent.rowconfigure(1, weight=1)
+        actions = ttk.Frame(parent, style="Card.TFrame")
+        actions.grid(row=0, column=0, sticky="e", pady=(0, 12))
+        self.cancel_button = ttk.Button(actions, text="Cancel", command=self._cancel, state="disabled")
+        self.cancel_button.pack(side="left", padx=8)
+        self.run_button = ttk.Button(actions, text="Start curation", style="Accent.TButton", command=self._start)
+        self.run_button.pack(side="left")
+        scroll_host = ttk.Frame(parent, style="Card.TFrame")
+        scroll_host.grid(row=1, column=0, sticky="nsew")
+        self.setup_canvas = tk.Canvas(
+            scroll_host, bg="#18232f", highlightthickness=0, borderwidth=0,
+        )
+        setup_scroll = ttk.Scrollbar(scroll_host, orient="vertical", command=self.setup_canvas.yview)
+        self.setup_canvas.configure(yscrollcommand=setup_scroll.set)
+        self.setup_canvas.pack(side="left", fill="both", expand=True)
+        setup_scroll.pack(side="right", fill="y")
+        content = ttk.Frame(self.setup_canvas, padding=(0, 0, 12, 8), style="Card.TFrame")
+        self._setup_canvas_window = self.setup_canvas.create_window((0, 0), window=content, anchor="nw")
+        content.bind("<Configure>", self._update_setup_scroll_region)
+        self.setup_canvas.bind("<Configure>", self._resize_setup_canvas_content)
+        self.setup_canvas.bind("<MouseWheel>", self._scroll_setup_canvas)
+
+        self._build_setup_content(content)
+
+    def _build_setup_content(self, parent) -> None:
         parent.columnconfigure(1, weight=1)
         ttk.Label(parent, text="Input", font=("Segoe UI Semibold", 15), style="Card.TLabel").grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 8))
         self._row(parent, 1, "Source images", self.source_var, self._choose_source, "Choose folder")
@@ -175,35 +210,47 @@ class FaceSetCuratorApp(tk.Tk):
 
         ttk.Separator(parent).grid(row=5, column=0, columnspan=3, sticky="ew", pady=14)
         ttk.Label(parent, text="Analysis", font=("Segoe UI Semibold", 15), style="Card.TLabel").grid(row=6, column=0, columnspan=3, sticky="w")
-        controls = ttk.Frame(parent, style="Card.TFrame")
-        controls.grid(row=7, column=0, columnspan=3, sticky="ew", pady=12)
-        for index in range(8): controls.columnconfigure(index, weight=1)
-        ttk.Label(controls, text="Backend", style="Card.TLabel").grid(row=0, column=0, sticky="w")
-        ttk.Combobox(controls, textvariable=self.backend_var, values=("insightface", "baseline"), state="readonly", width=14).grid(row=1, column=0, sticky="w")
-        ttk.Label(controls, text="Device", style="Card.TLabel").grid(row=0, column=1, sticky="w")
-        ttk.Combobox(controls, textvariable=self.device_var, values=("auto", "cuda", "cpu"), state="readonly", width=12).grid(row=1, column=1, sticky="w")
-        ttk.Label(controls, text="Best images", style="Card.TLabel").grid(row=0, column=2, sticky="w")
-        ttk.Spinbox(controls, from_=1, to=1000, textvariable=self.count_var, width=10).grid(row=1, column=2, sticky="w")
-        ttk.Label(controls, text="Profile", style="Card.TLabel").grid(row=0, column=3, sticky="w")
-        ttk.Combobox(controls, textvariable=self.profile_var,
-                     values=("Balanced", "Quality first", "Diversity first"),
-                     state="readonly", width=16).grid(row=1, column=3, sticky="w")
-        ttk.Label(controls, text="Duplicates", style="Card.TLabel").grid(row=0, column=4, sticky="w")
-        ttk.Combobox(controls, textvariable=self.duplicates_var,
-                     values=("Strong", "Normal", "Exact only"),
-                     state="readonly", width=14).grid(row=1, column=4, sticky="w")
-        ttk.Label(controls, text="Identity", style="Card.TLabel").grid(row=0, column=5, sticky="w")
-        identity_control = ttk.Combobox(controls, textvariable=self.identity_var,
-                                        values=("High", "Normal", "Custom"), state="readonly", width=14)
-        identity_control.grid(row=1, column=5, sticky="w")
-        identity_control.bind("<<ComboboxSelected>>", self._identity_mode_changed)
-        ttk.Label(controls, text="Threshold", style="Card.TLabel").grid(row=0, column=6, sticky="w")
-        self.identity_threshold_control = ttk.Spinbox(
-            controls, from_=0.0, to=1.0, increment=0.01,
-            textvariable=self.identity_threshold_var, width=10, state="disabled"
+        self.analysis_controls = ttk.Frame(parent, style="Card.TFrame")
+        self.analysis_controls.grid(row=7, column=0, columnspan=3, sticky="ew", pady=12)
+        self.analysis_fields: list[ttk.Frame] = []
+        self._add_analysis_field(
+            "Backend", lambda field: ttk.Combobox(field, textvariable=self.backend_var,
+                                                    values=("insightface", "baseline"), state="readonly", width=14),
         )
-        self.identity_threshold_control.grid(row=1, column=6, sticky="w")
-        ttk.Checkbutton(controls, text="Copy rejected", variable=self.copy_rejected_var).grid(row=1, column=7, sticky="w")
+        self._add_analysis_field(
+            "Device", lambda field: ttk.Combobox(field, textvariable=self.device_var,
+                                                   values=("auto", "cuda", "cpu"), state="readonly", width=12),
+        )
+        self._add_analysis_field(
+            "Best images", lambda field: ttk.Spinbox(field, from_=1, to=1000,
+                                                       textvariable=self.count_var, width=10),
+        )
+        self._add_analysis_field(
+            "Profile", lambda field: ttk.Combobox(field, textvariable=self.profile_var,
+                                                    values=("Balanced", "Quality first", "Diversity first"),
+                                                    state="readonly", width=16),
+        )
+        self._add_analysis_field(
+            "Duplicates", lambda field: ttk.Combobox(field, textvariable=self.duplicates_var,
+                                                       values=("Strong", "Normal", "Exact only"),
+                                                       state="readonly", width=14),
+        )
+        identity_control = self._add_analysis_field(
+            "Identity", lambda field: ttk.Combobox(field, textvariable=self.identity_var,
+                                                     values=("High", "Normal", "Custom"), state="readonly", width=14),
+        )
+        identity_control.bind("<<ComboboxSelected>>", self._identity_mode_changed)
+        self.identity_threshold_control = self._add_analysis_field(
+            "Threshold", lambda field: ttk.Spinbox(
+                field, from_=0.0, to=1.0, increment=0.01,
+                textvariable=self.identity_threshold_var, width=10, state="disabled"
+            ),
+        )
+        self._add_analysis_field(
+            "Output", lambda field: ttk.Checkbutton(field, text="Copy rejected", variable=self.copy_rejected_var),
+        )
+        self.analysis_controls.bind("<Configure>", self._reflow_analysis_controls)
+        self.after_idle(self._reflow_analysis_controls)
 
         ttk.Separator(parent).grid(row=8, column=0, columnspan=3, sticky="ew", pady=16)
         self.progress = ttk.Progressbar(parent, mode="determinate")
@@ -231,12 +278,40 @@ class FaceSetCuratorApp(tk.Tk):
         self.diagnostics_text.pack(side="left", fill="both", expand=True)
         diagnostic_scroll.pack(side="right", fill="y")
         self.diagnostics_frame.grid_remove()
-        actions = ttk.Frame(parent, style="Card.TFrame")
-        actions.grid(row=15, column=0, columnspan=3, sticky="e", pady=(18, 0))
-        self.cancel_button = ttk.Button(actions, text="Cancel", command=self._cancel, state="disabled")
-        self.cancel_button.pack(side="left", padx=8)
-        self.run_button = ttk.Button(actions, text="Start curation", style="Accent.TButton", command=self._start)
-        self.run_button.pack(side="left")
+    def _add_analysis_field(self, title: str, control_factory) -> ttk.Widget:
+        field = ttk.Frame(self.analysis_controls, style="Card.TFrame")
+        ttk.Label(field, text=title, style="Card.TLabel").pack(anchor="w")
+        control = control_factory(field)
+        control.pack(fill="x", pady=(3, 0))
+        self.analysis_fields.append(field)
+        return control
+
+    def _reflow_analysis_controls(self, _event=None) -> None:
+        width = self.analysis_controls.winfo_width()
+        if width <= 1:
+            return
+        columns = analysis_columns_for_width(width)
+        if getattr(self, "_analysis_columns", None) == columns:
+            return
+        self._analysis_columns = columns
+        for index in range(8):
+            self.analysis_controls.columnconfigure(index, weight=0)
+        for index in range(columns):
+            self.analysis_controls.columnconfigure(index, weight=1, uniform="analysis")
+        for field in self.analysis_fields:
+            field.grid_forget()
+        for index, field in enumerate(self.analysis_fields):
+            row, column = divmod(index, columns)
+            field.grid(row=row, column=column, sticky="ew", padx=(0, 8), pady=(0, 8))
+
+    def _update_setup_scroll_region(self, _event=None) -> None:
+        self.setup_canvas.configure(scrollregion=self.setup_canvas.bbox("all"))
+
+    def _resize_setup_canvas_content(self, event) -> None:
+        self.setup_canvas.itemconfigure(self._setup_canvas_window, width=event.width)
+
+    def _scroll_setup_canvas(self, event) -> None:
+        self.setup_canvas.yview_scroll(-int(event.delta / 120), "units")
 
     def _build_results(self, parent) -> None:
         top = ttk.Frame(parent, style="Card.TFrame")

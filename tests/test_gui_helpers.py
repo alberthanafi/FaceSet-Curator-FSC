@@ -1,6 +1,6 @@
 # Copyright © 2026 Hanafi Mohd Radi. All rights reserved.
 
-from faceset_curator.gui import FaceSetCuratorApp, friendly_failure
+from faceset_curator.gui import FaceSetCuratorApp, analysis_columns_for_width, friendly_failure
 from faceset_curator.help_content import HELP_TOPICS, matching_help_topics
 
 
@@ -31,3 +31,9 @@ def test_help_contains_documentation_and_about_content():
     assert "overview" in HELP_TOPICS
     assert "troubleshooting" in HELP_TOPICS
     assert HELP_TOPICS["about"][0] == "About FSC"
+
+
+def test_analysis_controls_reflow_for_window_width():
+    assert analysis_columns_for_width(1100) == 8
+    assert analysis_columns_for_width(900) == 4
+    assert analysis_columns_for_width(600) == 2
