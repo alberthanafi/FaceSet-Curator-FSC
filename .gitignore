@@ -12,6 +12,7 @@ venv/
 build/
 dist/
 FaceSet-Curator.zip
+FaceSort.zip
 *.exe
 *.msi
 

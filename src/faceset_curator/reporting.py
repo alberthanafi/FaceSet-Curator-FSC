@@ -13,7 +13,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 from .models import CuratorConfig, ImageAnalysis
-from . import __copyright__
+from . import __copyright__, __version__
 
 
 def materialize(run_dir: Path, items: list[ImageAnalysis], config: CuratorConfig,
@@ -69,7 +69,7 @@ def write_reports(run_dir: Path, items: list[ImageAnalysis], config: CuratorConf
                   performance_summary: dict | None = None,
                   manual_review: dict | None = None,
                   progress=None) -> None:
-    payload = {"program": "FaceSet Curator", "version": "0.1.0", "copyright": __copyright__,
+    payload = {"program": "FaceSort", "version": __version__, "copyright": __copyright__,
                "generated_at": datetime.now(timezone.utc).isoformat(), "config": asdict(config),
                "summary": dict(Counter(item.category for item in items)),
                "identity_distribution": identity_summary or {},
@@ -120,7 +120,7 @@ def write_reports(run_dir: Path, items: list[ImageAnalysis], config: CuratorConf
         review_line = (f"<p>Manual review: {len(review.get('added', []))} added; "
                        f"{len(review.get('removed', []))} removed; collective values recalculated.</p>")
     cards = "".join(f"<article><h3>{html.escape(x.source.name)}</h3><p>Dataset value: {x.dataset_value:.1f}</p><p>Quality: {x.quality_score:.2f} · Identity: {x.identity_score:.2f}</p><p>Expression: {html.escape(x.expression)} · Pose: {html.escape(x.pose_cluster or 'unknown')}</p><p>Scene: {html.escape(x.scene_cluster or 'unknown')} · Appearance: {html.escape(x.appearance_cluster or 'unknown')}</p><p>{html.escape('; '.join(x.reasons))}</p></article>" for x in selected)
-    page = f"""<!doctype html><!-- {__copyright__} --><meta charset='utf-8'><title>FaceSet Curator report</title><style>body{{font:16px system-ui;max-width:1100px;margin:40px auto;padding:0 20px;color:#17202a}}.grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}}article{{border:1px solid #ccd6dd;border-radius:12px;padding:16px}}h1{{margin-bottom:4px}}footer{{margin-top:32px;color:#667}}</style><h1>FaceSet Curator</h1><p>Selected {len(selected)} of {len(items)} analyzed images.</p>{identity_line}{enrollment_line}{review_line}<div class='grid'>{cards}</div><footer>{html.escape(__copyright__)}</footer>"""
+    page = f"""<!doctype html><!-- {__copyright__} --><meta charset='utf-8'><title>FaceSort report</title><style>body{{font:16px system-ui;max-width:1100px;margin:40px auto;padding:0 20px;color:#17202a}}.grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}}article{{border:1px solid #ccd6dd;border-radius:12px;padding:16px}}h1{{margin-bottom:4px}}footer{{margin-top:32px;color:#667}}</style><h1>FaceSort</h1><p>Selected {len(selected)} of {len(items)} analyzed images.</p>{identity_line}{enrollment_line}{review_line}<div class='grid'>{cards}</div><footer>{html.escape(__copyright__)}</footer>"""
     (run_dir / "report.html").write_text(page, encoding="utf-8")
     if progress:
         progress(3, 3)

@@ -1,8 +1,16 @@
 <!-- Copyright © 2026 Hanafi Mohd Radi. All rights reserved. -->
 
-# FaceSet Curator (FSC)
+# FaceSort
 
-FaceSet Curator builds the best *collective* face dataset from a collection of approximately 1,000–15,000 images. Its default `balanced` profile selects 100 images while penalizing duplicates and redundant coverage and rewarding useful variation in pose, expression, and visual conditions.
+**by HMR Studio** — Find the best. Sort the rest.
+
+Version 0.2.0 renames FaceSet Curator to FaceSort. Existing caches, recovery journals,
+Python imports, log locations, and the legacy `fsc` / `fsc-gui` commands remain compatible.
+New installations also provide `facesort` / `facesort-gui`. The installer keeps the
+existing application ID so it upgrades an existing installation. The GitHub repository
+URL remains unchanged.
+
+FaceSort builds the best *collective* face dataset from a collection of approximately 1,000–15,000 images. Its default `balanced` profile selects 100 images while penalizing duplicates and redundant coverage and rewarding useful variation in pose, expression, and visual conditions.
 
 ## Safety contract
 
@@ -30,12 +38,12 @@ Use `fsc plan` to print the effective configuration without touching images.
 
 The production command defaults to InsightFace and CUDA-first execution. It deliberately refuses to silently downgrade to the metadata-only baseline. For pipeline demonstrations without face semantics, pass `--backend baseline` explicitly.
 
-The GPU dependency set installs compatible CUDA and cuDNN runtime libraries with ONNX Runtime. FSC registers the pip-installed NVIDIA DLL directories for the lifetime of the Windows process, preloads the libraries, and verifies that every InsightFace model is actually using `CUDAExecutionProvider`; a silent session fallback to CPU is treated as a startup error. Run `fsc doctor` to check runtime availability.
+The GPU dependency set installs compatible CUDA and cuDNN runtime libraries with ONNX Runtime. FaceSort registers the pip-installed NVIDIA DLL directories for the lifetime of the Windows process, preloads the libraries, and verifies that every InsightFace model is actually using `CUDAExecutionProvider`; a silent session fallback to CPU is treated as a startup error. Run `fsc doctor` to check runtime availability.
 GPU runtime and analyzer revisions are part of the cache key, so results produced by an older or incorrectly loaded backend are not reused after an upgrade.
 
 ## Desktop application
 
-Double-click `FaceSet Curator.bat`, or run:
+Double-click `FaceSort.bat`, or run:
 
 ```powershell
 python -m pip install -e ".[gpu]"
@@ -50,21 +58,23 @@ In the application:
 4. Leave Backend on `insightface`, Device on `auto`, Best images on `100`, and start curation.
 5. Review selected and rejected images, compare them side by side, open the HTML report, or inspect categorized output folders.
 
-During analysis, FSC reports model loading, GPU warm-up, scanning, fingerprinting, cache lookup, face analysis, identity filtering, duplicate filtering, collective optimization, categorized copying, report generation, and completion as distinct stages. Face analysis shows smoothed images-per-second throughput, cache hits, eligible-image count, selected count, and an ETA based only on active inference time so startup does not distort the estimate.
+During analysis, FaceSort reports model loading, GPU warm-up, scanning, fingerprinting, cache lookup, face analysis, identity filtering, duplicate filtering, collective optimization, categorized copying, report generation, and completion as distinct stages. Face analysis shows smoothed images-per-second throughput, cache hits, eligible-image count, selected count, and an ETA based only on active inference time so startup does not distort the estimate.
 
-Before loading the AI models, FSC estimates output-copy and report space and stops with a clear message when the selected drive is too full. Every active output contains `INCOMPLETE.txt` and a `.fsc-run.json` recovery journal. A later run with the same source, settings, and analyzer version resumes that directory, reuses cached analysis, and skips categorized copies already verified by size. The incomplete marker is removed only after all three reports are complete. Model loading, enrollment, GPU warm-up, analysis, and copying all honor cancellation between safe processing steps.
+Before loading the AI models, FaceSort estimates output-copy and report space and stops with a clear message when the selected drive is too full. Every active output contains `INCOMPLETE.txt` and a `.fsc-run.json` recovery journal. A later run with the same source, settings, and analyzer version resumes that directory, reuses cached analysis, and skips categorized copies already verified by size. The incomplete marker is removed only after all three reports are complete. Model loading, enrollment, GPU warm-up, analysis, and copying all honor cancellation between safe processing steps.
 
 Operational messages and full failures are written to a rotating log at `%LOCALAPPDATA%\FaceSetCurator\logs\fsc.log` (5 MB per file, three backups). The path is shown in Diagnostics.
 
-The setup screen explicitly reports whether the AI engine is running on CUDA or CPU. A collapsible Diagnostics panel keeps provider details and full startup errors inside the application while error dialogs show a short corrective explanation. FSC validates the official `buffalo_l` model package with SHA-256 checksums, detects missing or partial files, retries interrupted downloads, and resumes from the saved partial archive. `fsc doctor --device cuda` now executes and profiles a real ONNX kernel to verify that CUDA—not merely the CUDA provider registration—is active.
+The setup screen explicitly reports whether the AI engine is running on CUDA or CPU. A collapsible Diagnostics panel keeps provider details and full startup errors inside the application while error dialogs show a short corrective explanation. FaceSort validates the official `buffalo_l` model package with SHA-256 checksums, detects missing or partial files, retries interrupted downloads, and resumes from the saved partial archive. `fsc doctor --device cuda` now executes and profiles a real ONNX kernel to verify that CUDA—not merely the CUDA provider registration—is active.
 
 The setup screen continuously displays total CPU load, system RAM use, NVIDIA GPU utilization, GPU memory use, and GPU temperature. Hardware statistics refresh once per second without blocking the interface.
 
 The desktop controls and dropdown lists use a high-contrast dark theme, including read-only selection fields.
 
+The Windows application window, executable, installer, and installed shortcuts use the supplied FaceSort logo. The multi-resolution icon is packaged with both Python installations and standalone builds.
+
 The Setup & Run tab keeps Cancel and Start curation in a fixed top action bar. Its content scrolls vertically when needed, while analysis settings reflow from one wide row to two or four readable rows as the window narrows.
 
-The Help tab provides searchable offline documentation for setup, references, selection profiles, identity verification, duplicate filtering, large-library performance, results, reports, troubleshooting, privacy, and source safety. Its About FSC page shows the installed version, copyright notice, technology summary, and project website.
+The Help tab provides searchable offline documentation for setup, references, selection profiles, identity verification, duplicate filtering, large-library performance, results, reports, troubleshooting, privacy, and source safety. Its About FaceSort page shows the installed version, copyright notice, technology summary, and project website.
 
 The Results tab can filter selected images and every rejection category, including identity, quality, duplicates, redundancy, multiple faces, invalid images, and manual exclusions. Minimum identity and quality filters narrow large result sets. Selecting a duplicate automatically shows its group representative for side-by-side comparison, and every row displays its recorded “why rejected” reason. Eligible redundant images can be manually included and selected images can be excluded; safety rejections such as wrong identity, multiple faces, invalid files, low quality, and duplicates remain locked. Each controlled edit keeps the target size when alternatives exist, recalculates collective dataset values, updates categorized copies and all reports, and preserves the previous report revision under `.fsc-review-history`.
 
@@ -78,13 +88,13 @@ For dataset-specific threshold calibration, prepare a labeled CSV with `identity
 fsc calibrate C:\benchmarks\faces.csv --output C:\benchmarks\calibration.json
 ```
 
-Labels accept `yes/no`, `true/false`, or `1/0`. FSC reports the deterministic threshold with the best balanced accuracy together with precision, recall, and confusion counts; it never changes the High default automatically.
+Labels accept `yes/no`, `true/false`, or `1/0`. FaceSort reports the deterministic threshold with the best balanced accuracy together with precision, recall, and confusion counts; it never changes the High default automatically.
 
 The InsightFace backend uses concurrent CPU decoding and hashing, a bounded prefetch queue, batched CUDA face detection, and batched recognition. GPU batch size defaults to automatic VRAM-based selection (8 images on a 16 GB RTX 5080); CPU worker count defaults from available logical processors. CLI users can override these with `--gpu-batch-size`, `--cpu-workers`, and `--decode-queue-size`. The effective performance configuration is saved in `report.json`.
 
 The first InsightFace run may initialize model assets before analysis begins. References should cover the same person clearly; two to five varied, high-quality references are preferable.
 
-FSC displays thumbnails for up to five enrollment references and compares every reference pair after face analysis. It warns when only one reference is supplied, when more than five are supplied, or when the references may not show the same identity consistently.
+FaceSort displays thumbnails for up to five enrollment references and compares every reference pair after face analysis. It warns when only one reference is supplied, when more than five are supplied, or when the references may not show the same identity consistently.
 
 Identity verification defaults to **High** (`0.72`). **Normal** uses `0.65` for broader matching, while **Custom** accepts a threshold from `0.00` to `1.00`. Changing this threshold does not rerun face inference when cached analysis for the same references is available. Results and reports include the minimum, median, maximum, threshold-pass count, and score-distribution buckets. A run with no qualifying images displays the rejection totals and recommended corrective action.
 
@@ -99,13 +109,13 @@ Identity verification defaults to **High** (`0.72`). **Normal** uses `0.65` for 
 
 ## Standalone Windows build
 
-The PyInstaller definition is in `packaging/`. To produce `dist/FaceSetCurator.exe`:
+The PyInstaller definition is in `packaging/`. To produce `dist/FaceSort.exe`:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File packaging\build.ps1
 ```
 
-The release script compiles the project, runs the dependency-free test suite, verifies real CUDA inference, builds the standalone executable, and runs the executable's own `--doctor` and self-closing `--gui-smoke` checks. It removes InsightFace's overlapping CPU-only ONNX Runtime distribution and reinstalls the GPU distribution last, preventing an apparently successful CPU-only package. If Inno Setup 7 (preferred) or 6 is installed, the script also creates `dist\FaceSetCurator-Setup.exe`; the installer repeats CUDA verification after installation and displays a repair warning if it fails.
+The release script compiles the project, runs the dependency-free test suite, verifies real CUDA inference, builds the standalone executable, and runs the executable's own `--doctor` and self-closing `--gui-smoke` checks. It removes InsightFace's overlapping CPU-only ONNX Runtime distribution and reinstalls the GPU distribution last, preventing an apparently successful CPU-only package. If Inno Setup 7 (preferred) or 6 is installed, the script also creates `dist\FaceSort-Setup.exe`; the installer repeats CUDA verification after installation and displays a repair warning if it fails.
 
 ## Output
 

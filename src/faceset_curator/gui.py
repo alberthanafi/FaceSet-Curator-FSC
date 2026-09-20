@@ -44,10 +44,10 @@ def analysis_columns_for_width(width: int) -> int:
 def friendly_failure(message: str) -> str:
     lowered = message.lower()
     if "download" in lowered or "connectionreset" in lowered or "connection reset" in lowered:
-        return ("The face-analysis models could not be downloaded completely. FSC kept the partial "
+        return ("The face-analysis models could not be downloaded completely. FaceSort kept the partial "
                 "download and will resume it when you start again.")
     if "cuda" in lowered or "cudnn" in lowered or "executionprovider" in lowered:
-        return ("CUDA could not start, so FSC stopped instead of silently using the CPU. Open diagnostics "
+        return ("CUDA could not start, so FaceSort stopped instead of silently using the CPU. Open diagnostics "
                 "for details, then run 'fsc doctor --device cuda'.")
     if "reference" in lowered:
         return "The target reference images could not be enrolled. Use clear images containing exactly one face."
@@ -56,10 +56,12 @@ def friendly_failure(message: str) -> str:
     return "Curation stopped because an unexpected error occurred. Open diagnostics for the technical details."
 
 
-class FaceSetCuratorApp(tk.Tk):
+class FaceSortApp(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
-        self.title("FaceSet Curator")
+        self.title("HMR Studio • FaceSort")
+        if os.name == "nt":
+            self.iconbitmap(default=str(Path(__file__).parent / "assets" / "fsc.ico"))
         self.geometry("1120x780")
         self.minsize(900, 620)
         self.configure(bg="#101720")
@@ -148,8 +150,8 @@ class FaceSetCuratorApp(tk.Tk):
         shell.pack(fill="both", expand=True)
         header = ttk.Frame(shell)
         header.pack(fill="x", pady=(0, 12))
-        ttk.Label(header, text="FaceSet Curator", style="Title.TLabel").pack(anchor="w")
-        ttk.Label(header, text="Build the best collective face dataset—not merely the highest individual scores.", style="Muted.TLabel").pack(anchor="w", pady=(3, 0))
+        ttk.Label(header, text="FaceSort", style="Title.TLabel").pack(anchor="w")
+        ttk.Label(header, text="by HMR Studio • Find the best. Sort the rest.", style="Muted.TLabel").pack(anchor="w", pady=(3, 0))
         ttk.Label(header, text=__copyright__, style="Muted.TLabel").pack(anchor="w", pady=(3, 0))
 
         self.notebook = ttk.Notebook(shell)
@@ -318,7 +320,7 @@ class FaceSetCuratorApp(tk.Tk):
         top.pack(fill="x")
         summary = ttk.Frame(top, style="Card.TFrame")
         summary.pack(side="left")
-        self.summary_label = ttk.Label(summary, text="Run FSC to see the selected set.", font=("Segoe UI Semibold", 14), style="Card.TLabel")
+        self.summary_label = ttk.Label(summary, text="Run FaceSort to see the selected set.", font=("Segoe UI Semibold", 14), style="Card.TLabel")
         self.summary_label.pack(anchor="w")
         self.identity_summary_label = ttk.Label(summary, text="Identity distribution will appear here.", style="Card.TLabel")
         self.identity_summary_label.pack(anchor="w", pady=(4, 0))
@@ -392,7 +394,7 @@ class FaceSetCuratorApp(tk.Tk):
         toolbar = ttk.Frame(parent, style="Card.TFrame")
         toolbar.pack(fill="x", pady=(0, 12))
         ttk.Button(toolbar, text="Home", command=lambda: self._select_help_topic("overview")).pack(side="left")
-        ttk.Button(toolbar, text="About FSC", command=lambda: self._select_help_topic("about")).pack(side="left", padx=6)
+        ttk.Button(toolbar, text="About FaceSort", command=lambda: self._select_help_topic("about")).pack(side="left", padx=6)
         ttk.Label(toolbar, text="Search documentation", style="Card.TLabel").pack(side="left", padx=(18, 6))
         search = ttk.Entry(toolbar, textvariable=self.help_search_var, width=32)
         search.pack(side="left", fill="x", expand=True)
@@ -448,7 +450,7 @@ class FaceSetCuratorApp(tk.Tk):
                 item_id = f"help_{key}"
                 self.help_tree.insert(docs, "end", iid=item_id, text=HELP_TOPICS[key][0])
                 self.help_topic_ids[item_id] = key
-            about = self.help_tree.insert("", "end", iid="help_about", text="About FSC")
+            about = self.help_tree.insert("", "end", iid="help_about", text="About FaceSort")
             self.help_topic_ids[about] = "about"
         if not matches:
             self._render_help_message("No documentation topics match that search.")
@@ -493,7 +495,7 @@ class FaceSetCuratorApp(tk.Tk):
         self.help_text.delete("1.0", "end")
         self.help_text.insert("end", title + "\n", "title")
         if key == "about":
-            self.help_text.insert("end", f"FaceSet Curator {__version__}\n{__copyright__}\n", "meta")
+            self.help_text.insert("end", f"FaceSort {__version__}\n{__copyright__}\n", "meta")
         self.help_text.insert("end", summary + "\n", "body")
         for heading, body in sections:
             self.help_text.insert("end", heading + "\n", "heading")
@@ -565,7 +567,7 @@ class FaceSetCuratorApp(tk.Tk):
         if self.backend_var.get() == "insightface" and not 2 <= len(self.references) <= 5:
             if not messagebox.askyesno(
                 "Reference recommendation",
-                f"You selected {len(self.references)} reference image(s). FSC recommends 2–5 clear, varied, "
+                f"You selected {len(self.references)} reference image(s). FaceSort recommends 2–5 clear, varied, "
                 "single-face images for reliable identity enrollment. Continue anyway?",
             ):
                 return None
@@ -807,7 +809,7 @@ class FaceSetCuratorApp(tk.Tk):
             }}
             messagebox.showwarning(
                 "No images qualified",
-                f"FSC selected 0 images. Identity rejected {counts['rejected/identity']}; "
+                f"FaceSort selected 0 images. Identity rejected {counts['rejected/identity']}; "
                 f"multiple faces {counts['rejected/multiple_faces']}; no face/invalid "
                 f"{counts['rejected/no_face_or_invalid']}; quality {counts['rejected/quality']}.\n\n"
                 f"{identity_text}\n\nReview the reference images or choose a less strict identity threshold.",
@@ -894,7 +896,7 @@ class FaceSetCuratorApp(tk.Tk):
             return
         exclude = self.review_compare if self.review_compare and self.review_compare.category == "selected" else None
         detail = (f" and replace {exclude.source.name}" if exclude else
-                  "; FSC will automatically remove the least-useful selected image")
+                  "; FaceSort will automatically remove the least-useful selected image")
         if messagebox.askyesno(
             "Include image",
             f"Include {self.review_current.source.name}{detail}?\n\n"
@@ -907,7 +909,7 @@ class FaceSetCuratorApp(tk.Tk):
             return
         if messagebox.askyesno(
             "Exclude image",
-            f"Exclude {self.review_current.source.name}? FSC will choose the best replacement and "
+            f"Exclude {self.review_current.source.name}? FaceSort will choose the best replacement and "
             "recalculate all collective dataset values.",
         ):
             self._run_manual_review(None, self.review_current.path)
@@ -980,7 +982,7 @@ class FaceSetCuratorApp(tk.Tk):
         self._append_diagnostic(diagnostics)
         if not self.diagnostics_frame.winfo_viewable():
             self._toggle_diagnostics()
-        messagebox.showerror("FaceSet Curator", f"{message}\n\nTechnical details are shown in Diagnostics.")
+        messagebox.showerror("FaceSort", f"{message}\n\nTechnical details are shown in Diagnostics.")
 
     @staticmethod
     def _format_duration(seconds: float) -> str:
@@ -1011,8 +1013,11 @@ class FaceSetCuratorApp(tk.Tk):
         if self.run_dir and (self.run_dir / "report.html").exists(): os.startfile(self.run_dir / "report.html")
 
 
+FaceSetCuratorApp = FaceSortApp  # Compatibility for existing Python integrations.
+
+
 def main() -> None:
-    FaceSetCuratorApp().mainloop()
+    FaceSortApp().mainloop()
 
 
 if __name__ == "__main__":

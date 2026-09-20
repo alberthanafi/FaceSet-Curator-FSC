@@ -29,7 +29,7 @@ def _backend(args):
 
 
 def parser() -> argparse.ArgumentParser:
-    root = argparse.ArgumentParser(prog="fsc", description="FaceSet Curator")
+    root = argparse.ArgumentParser(prog="facesort", description="FaceSort by HMR Studio")
     commands = root.add_subparsers(dest="command", required=True)
     commands.add_parser("plan", help="Show default Full/Balanced policy")
     run = commands.add_parser("curate", help="Analyze and curate a source directory")

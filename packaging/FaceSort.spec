@@ -6,6 +6,8 @@ from PyInstaller.utils.hooks import collect_all, collect_dynamic_libs
 project_root = os.path.abspath(os.path.join(SPECPATH, ".."))
 
 datas, binaries, hiddenimports = [], [], []
+icon_path = os.path.join(project_root, "src", "faceset_curator", "assets", "fsc.ico")
+datas.append((icon_path, "faceset_curator/assets"))
 for package in ("insightface", "onnxruntime", "cv2"):
     package_datas, package_binaries, package_hidden = collect_all(package)
     datas += package_datas
@@ -13,7 +15,7 @@ for package in ("insightface", "onnxruntime", "cv2"):
     hiddenimports += package_hidden
 
 # ONNX Runtime's pip CUDA extras install runtime DLLs in namespace packages.
-# Keep their directory layout so FSC can register each */bin directory.
+# Keep their directory layout so FaceSort can register each */bin directory.
 for package in ("nvidia.cublas", "nvidia.cuda_nvrtc", "nvidia.cuda_runtime",
                 "nvidia.cudnn", "nvidia.cufft", "nvidia.curand", "nvidia.nvjitlink"):
     binaries += collect_dynamic_libs(package)
@@ -33,11 +35,12 @@ a = Analysis(
 pyz = PYZ(a.pure)
 exe = EXE(
     pyz, a.scripts, a.binaries, a.datas,
-    name="FaceSetCurator",
+    name="FaceSort",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     console=False,
+    icon=icon_path,
     version=os.path.join(SPECPATH, "version_info.txt"),
 )

@@ -38,7 +38,7 @@ class RunJournal:
                 "current": 0, "total": 0, "resumed": 0, "error": None,
             }
         self.marker_path.write_text(
-            "This FaceSet Curator run is incomplete and is safe to resume.\n"
+            "This FaceSort run is incomplete and is safe to resume.\n"
             "Source images were not changed.\n", encoding="utf-8"
         )
         self._write()

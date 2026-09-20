@@ -6,8 +6,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "faceset-curator"
-version = "0.1.0"
-description = "Local, auditable, diversity-aware face dataset curator"
+version = "0.2.0"
+description = "FaceSort by HMR Studio — local face-image sorting and selection"
 authors = [{ name = "Hanafi Mohd Radi" }]
 license = { text = "Copyright © 2026 Hanafi Mohd Radi. All rights reserved." }
 classifiers = ["License :: Other/Proprietary License"]
@@ -25,11 +25,16 @@ gpu = [
 test = ["pytest>=8.0"]
 
 [project.scripts]
+facesort = "faceset_curator.cli:main"
+facesort-gui = "faceset_curator.gui:main"
 fsc = "faceset_curator.cli:main"
 fsc-gui = "faceset_curator.gui:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+faceset_curator = ["assets/*.ico"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

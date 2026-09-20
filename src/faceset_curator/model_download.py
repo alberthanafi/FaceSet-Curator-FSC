@@ -75,7 +75,7 @@ def _download_once(url: str, destination: Path, progress: Callable[[dict[str, An
                    cancelled: Callable[[], bool] | None = None,
                    opener: Callable[..., Any] = urllib.request.urlopen) -> None:
     existing = destination.stat().st_size if destination.is_file() else 0
-    request = urllib.request.Request(url, headers={"User-Agent": "FaceSet-Curator/0.1"})
+    request = urllib.request.Request(url, headers={"User-Agent": "FaceSort/0.2"})
     if existing:
         request.add_header("Range", f"bytes={existing}-")
     try:
@@ -130,7 +130,7 @@ def download_with_retries(url: str, destination: Path,
                 time.sleep(min(2 ** (attempt - 1), 8))
     raise ModelDownloadError(
         f"The InsightFace model download failed after {attempts} attempts. "
-        "The partial file was kept and FSC will resume it next time."
+        "The partial file was kept and FaceSort will resume it next time."
     ) from last_error
 
 

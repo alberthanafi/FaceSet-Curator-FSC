@@ -19,17 +19,17 @@ python packaging\run_tests.py
 if ($LASTEXITCODE -ne 0) { throw "Release tests failed." }
 python -m faceset_curator.cli doctor --device cuda
 if ($LASTEXITCODE -ne 0) { throw "Build environment CUDA verification failed." }
-python -m PyInstaller --noconfirm --clean packaging\FaceSetCurator.spec
+python -m PyInstaller --noconfirm --clean packaging\FaceSort.spec
 if ($LASTEXITCODE -ne 0) { throw "Standalone executable build failed." }
-& "$ProjectRoot\dist\FaceSetCurator.exe" --doctor
+& "$ProjectRoot\dist\FaceSort.exe" --doctor
 if ($LASTEXITCODE -ne 0) {
     throw "Standalone executable CUDA verification failed."
 }
-& "$ProjectRoot\dist\FaceSetCurator.exe" --gui-smoke
+& "$ProjectRoot\dist\FaceSort.exe" --gui-smoke
 if ($LASTEXITCODE -ne 0) {
     throw "Standalone executable GUI startup smoke failed."
 }
-Write-Host "Built dist\FaceSetCurator.exe"
+Write-Host "Built dist\FaceSort.exe"
 
 $IsccCandidates = @(
     "$env:ProgramFiles\Inno Setup 7\ISCC.exe",
@@ -39,9 +39,9 @@ $IsccCandidates = @(
 )
 $Iscc = $IsccCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
 if ($Iscc) {
-    & $Iscc packaging\FaceSetCurator.iss
+    & $Iscc packaging\FaceSort.iss
     if ($LASTEXITCODE -ne 0) { throw "Installer build failed." }
-    Write-Host "Built dist\FaceSetCurator-Setup.exe"
+    Write-Host "Built dist\FaceSort-Setup.exe"
 } else {
     Write-Warning "Inno Setup 7 or 6 was not found. EXE is ready; install Inno Setup to build the installer."
 }

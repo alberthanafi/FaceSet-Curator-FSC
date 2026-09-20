@@ -5,12 +5,12 @@ from __future__ import annotations
 
 HELP_TOPICS = {
     "overview": (
-        "What is FaceSet Curator?",
-        "FaceSet Curator (FSC) builds a strong collective set of target-face images. "
+        "What is FaceSort?",
+        "FaceSort by HMR Studio builds a strong collective set of target-face images. "
         "It considers identity accuracy, image quality, pose, expression, uniqueness, "
         "appearance, scene, and diversity instead of simply keeping the highest individual scores.",
         (
-            ("Designed for local work", "FSC analyzes images on this Windows computer and keeps the source collection unchanged."),
+            ("Designed for local work", "FaceSort analyzes images on this Windows computer and keeps the source collection unchanged."),
             ("Recommended defaults", "Balanced profile, Strong duplicate filtering, High identity verification, 100 best images, CUDA device, and analysis caching."),
             ("Library size", "The optimized workflow is intended for approximately 1,000–15,000 source images."),
         ),
@@ -19,19 +19,19 @@ HELP_TOPICS = {
         "Quick start",
         "Choose the source collection, a separate output location, and clear reference images before starting curation.",
         (
-            ("1. Source images", "Choose the folder containing the images to analyze. FSC scans supported image files recursively."),
-            ("2. Output location", "Choose a folder outside the source tree. FSC creates a subfolder matching the source folder name and a timestamped run folder."),
+            ("1. Source images", "Choose the folder containing the images to analyze. FaceSort scans supported image files recursively."),
+            ("2. Output location", "Choose a folder outside the source tree. FaceSort creates a subfolder matching the source folder name and a timestamped run folder."),
             ("3. Target references", "Use 2–5 clear, varied photos that each contain exactly one face of the target person."),
             ("4. Start curation", "Keep the recommended defaults unless the collection needs a different quality/diversity balance."),
         ),
     ),
     "references": (
         "Target references",
-        "Reference images establish the identity FSC should keep. Multiple varied references are more reliable than one image.",
+        "Reference images establish the identity FaceSort should keep. Multiple varied references are more reliable than one image.",
         (
             ("Good references", "Use sharp, well-lit, unobstructed faces from different angles or sessions."),
             ("Avoid", "Group photos, tiny faces, heavy filters, strong occlusion, extreme blur, and images of different people."),
-            ("Enrollment", "FSC validates and combines the accepted reference embeddings before analyzing the source collection."),
+            ("Enrollment", "FaceSort validates and combines the accepted reference embeddings before analyzing the source collection."),
         ),
     ),
     "profiles": (
@@ -63,7 +63,7 @@ HELP_TOPICS = {
     ),
     "performance": (
         "Performance and large libraries",
-        "FSC is tuned for large image libraries and uses CUDA on the NVIDIA GPU for face inference while the CPU assists with scanning, decoding, and hashing.",
+        "FaceSort is tuned for large image libraries and uses CUDA on the NVIDIA GPU for face inference while the CPU assists with scanning, decoding, and hashing.",
         (
             ("Live status", "Progress stages, throughput, cache hits, selected/eligible counts, ETA, CPU, RAM, GPU, VRAM, and temperature update during a run."),
             ("Caching", "Completed analysis is cached. Compatible reruns and resumed jobs avoid repeating valid work."),
@@ -76,7 +76,7 @@ HELP_TOPICS = {
         (
             ("Filter", "Filter by category, minimum identity score, and minimum quality score."),
             ("Compare", "Review images side by side. Duplicate entries automatically show their group representative when available."),
-            ("Adjust", "Eligible redundant images can be included and selected images can be excluded. FSC recalculates the collective set and reports."),
+            ("Adjust", "Eligible redundant images can be included and selected images can be excluded. FaceSort recalculates the collective set and reports."),
         ),
     ),
     "reports": (
@@ -92,15 +92,15 @@ HELP_TOPICS = {
         "Troubleshooting",
         "Use the Diagnostics panel on Setup & Run when models, references, CUDA, or a curation stage cannot start.",
         (
-            ("CUDA unavailable", "FSC stops instead of silently using CPU. Confirm a compatible NVIDIA driver and run the packaged doctor check."),
-            ("Model download interrupted", "Start again. FSC preserves the partial archive and resumes the download when possible."),
+            ("CUDA unavailable", "FaceSort stops instead of silently using CPU. Confirm a compatible NVIDIA driver and run the packaged doctor check."),
+            ("Model download interrupted", "Start again. FaceSort preserves the partial archive and resumes the download when possible."),
             ("No images selected", "Review rejection totals, use clearer references, or cautiously choose Normal identity verification."),
             ("Log file", "Detailed operational messages are stored under %LOCALAPPDATA%\\FaceSetCurator\\logs\\fsc.log."),
         ),
     ),
     "privacy": (
         "Privacy and source safety",
-        "FSC is a local application. Its curation pipeline does not upload source or reference images.",
+        "FaceSort is a local application. Its curation pipeline does not upload source or reference images.",
         (
             ("Originals", "Source images are never modified, moved, renamed, or deleted."),
             ("Separate output", "The output must be outside the source tree. Selected and categorized rejected files are copied."),
@@ -108,8 +108,8 @@ HELP_TOPICS = {
         ),
     ),
     "about": (
-        "About FSC",
-        "FaceSet Curator is a local, auditable, diversity-aware face dataset curation application for Windows.",
+        "About FaceSort",
+        "FaceSort by HMR Studio sorts face images and selects a diverse, high-quality set locally on Windows.",
         (
             ("Technology", "Python desktop interface, InsightFace, ONNX Runtime CUDA, Pillow, and OpenCV."),
             ("Project", "FaceSet-Curator-FSC on GitHub."),

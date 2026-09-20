@@ -30,7 +30,7 @@ def test_help_search_finds_cuda_performance_guidance():
 def test_help_contains_documentation_and_about_content():
     assert "overview" in HELP_TOPICS
     assert "troubleshooting" in HELP_TOPICS
-    assert HELP_TOPICS["about"][0] == "About FSC"
+    assert HELP_TOPICS["about"][0] == "About FaceSort"
 
 
 def test_analysis_controls_reflow_for_window_width():

@@ -4,7 +4,7 @@
 
 ## Design goals
 
-FSC targets 1,000–15,000 local images, an RTX 5080 CUDA GPU, and Ryzen 7 5700X3D CPU assistance. The default policy is Full/Balanced, 100 selected images, Strong duplicate filtering, High identity verification, and enabled quality, pose, expression, clustering, diversity balancing, and caching.
+FaceSort targets 1,000–15,000 local images, an RTX 5080 CUDA GPU, and Ryzen 7 5700X3D CPU assistance. The default policy is Full/Balanced, 100 selected images, Strong duplicate filtering, High identity verification, and enabled quality, pose, expression, clustering, diversity balancing, and caching.
 
 ## Pipeline
 

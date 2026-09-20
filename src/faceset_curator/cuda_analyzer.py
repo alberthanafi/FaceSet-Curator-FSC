@@ -107,7 +107,7 @@ def prepare_cuda_runtime(ort: Any, provider: str = "auto") -> list[str]:
         preload(directory="")
     except Exception as exc:
         raise BackendUnavailable(
-            "CUDA/cuDNN runtime DLLs could not be loaded. Reinstall the FSC GPU dependencies "
+            "CUDA/cuDNN runtime DLLs could not be loaded. Reinstall the FaceSort GPU dependencies "
             "with onnxruntime-gpu[cuda,cudnn]>=1.21,<1.27."
         ) from exc
     return ["CUDAExecutionProvider", "CPUExecutionProvider"]
@@ -207,7 +207,7 @@ class InsightFaceAnalyzer:
             if cpu_only:
                 raise BackendUnavailable(
                     "CUDA initialization failed and ONNX Runtime fell back to CPU for: "
-                    f"{', '.join(cpu_only)}. Reinstall the FSC GPU dependencies and run 'fsc doctor'."
+                    f"{', '.join(cpu_only)}. Reinstall the FaceSort GPU dependencies and run 'fsc doctor'."
                 )
         self.default_batch_size = (batch_size or automatic_gpu_batch_size()) if providers[0] == "CUDAExecutionProvider" else 1
         self.default_cpu_workers = cpu_workers or automatic_cpu_workers()

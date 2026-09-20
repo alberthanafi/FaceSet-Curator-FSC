@@ -9,12 +9,12 @@ executables, installers, caches, model files, and test output are excluded by `.
 
 Attach binaries to a GitHub Release rather than committing them to the repository:
 
-- `FaceSetCurator-Setup.exe` — full offline GPU installer.
-- `FaceSet-Curator.zip` — optional exact source snapshot; GitHub also creates source archives automatically.
+- `FaceSort-Setup.exe` — full offline GPU installer.
+- `FaceSort.zip` — optional exact source snapshot; GitHub also creates source archives automatically.
 - SHA-256 checksums for every uploaded binary.
 
 GitHub requires each individual Release asset to remain under 2 GiB. Always verify artifact size and
-run both `FaceSetCurator.exe --doctor` and `FaceSetCurator.exe --gui-smoke` before publishing.
+run both `FaceSort.exe --doctor` and `FaceSort.exe --gui-smoke` before publishing.
 
 ## Licensing
 
