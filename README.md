@@ -8,7 +8,7 @@ Version 0.2.0 renames FaceSet Curator to FaceSort. Existing caches, recovery jou
 Python imports, log locations, and the legacy `fsc` / `fsc-gui` commands remain compatible.
 New installations also provide `facesort` / `facesort-gui`. The installer keeps the
 existing application ID so it upgrades an existing installation. The GitHub repository
-URL remains unchanged.
+is now [alberthanafi/FaceSort](https://github.com/alberthanafi/FaceSort).
 
 FaceSort builds the best *collective* face dataset from a collection of approximately 1,000–15,000 images. Its default `balanced` profile selects 100 images while penalizing duplicates and redundant coverage and rewarding useful variation in pose, expression, and visual conditions.
 

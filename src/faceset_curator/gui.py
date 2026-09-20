@@ -505,7 +505,7 @@ class FaceSortApp(tk.Tk):
 
     @staticmethod
     def _open_project_website() -> None:
-        webbrowser.open("https://github.com/alberthanafi/FaceSet-Curator-FSC")
+        webbrowser.open("https://github.com/alberthanafi/FaceSort")
 
     def _choose_source(self) -> None:
         if value := filedialog.askdirectory(title="Choose source image folder"):

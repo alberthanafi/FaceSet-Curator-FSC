@@ -112,7 +112,7 @@ HELP_TOPICS = {
         "FaceSort by HMR Studio sorts face images and selects a diverse, high-quality set locally on Windows.",
         (
             ("Technology", "Python desktop interface, InsightFace, ONNX Runtime CUDA, Pillow, and OpenCV."),
-            ("Project", "FaceSet-Curator-FSC on GitHub."),
+            ("Project", "FaceSort on GitHub."),
             ("Rights", "This project is publicly visible but proprietary. Public access does not grant reuse or redistribution rights."),
         ),
     ),
